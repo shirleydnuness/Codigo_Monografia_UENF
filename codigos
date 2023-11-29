@@ -1,0 +1,1024 @@
+
+#Solar
+import cdsapi
+c = cdsapi.Client()
+c.retrieve(
+    'reanalysis-era5-single-levels',
+    {
+        'product_type': 'reanalysis',
+        'format': 'netcdf',
+        'variable': [
+            'surface_solar_radiation_downward_clear_sky', 'total_sky_direct_solar_radiation_at_surface',
+        ],
+        'year': '2022',
+        'month': [
+            '01', '02', '03',
+            '04', '05', '06',
+            '07', '08', '09',
+            '10', '11', '12',
+        ],
+        'day': [
+            '01', '02', '03',
+            '04', '05', '06',
+            '07', '08', '09',
+            '10', '11', '12',
+            '13', '14', '15',
+            '16', '17', '18',
+            '19', '20', '21',
+            '22', '23', '24',
+            '25', '26', '27',
+            '28', '29', '30',
+            '31',
+        ],
+        'time': [
+            '00:00', '01:00', '02:00',
+            '03:00', '04:00', '05:00',
+            '06:00', '07:00', '08:00',
+            '09:00', '10:00', '11:00',
+            '12:00', '13:00', '14:00',
+            '15:00', '16:00', '17:00',
+            '18:00', '19:00', '20:00',
+            '21:00', '22:00', '23:00',
+        ],
+        'area': [
+            -27, -45, -20, -35,
+        ],
+    },
+    'Era5_2022_SOLAR_CAMPOS.nc')
+
+import xarray as xr
+
+####################################
+# Carregue o arquivo NetCDF com os dados
+####################################
+
+ds = xr.open_dataset('Era5_2022_SOLAR_CAMPOS.nc', engine='netcdf4')
+ds
+import xarray as xr
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_SOLAR_CAMPOS.nc', engine='netcdf4')
+
+# Variáveis relevantes
+ssrdc = ds['ssrdc']  # Incidência solar total
+fdir = ds['fdir']    # Direção solar
+
+# Crie mapas para a média da incidência solar e direção solar
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(15, 10), dpi=100, subplot_kw={'projection': ccrs.PlateCarree()})
+
+# Mapa da média de incidência solar total
+ax0 = axes[0]
+ssrdc_mean = ssrdc.mean(dim='time')
+ax0.set_extent([-75, -35, -35, 5])
+ax0.coastlines(resolution='50m', linewidth=1)
+ax0.add_feature(cfeature.BORDERS, linestyle='-', linewidth=1)
+ax0.add_feature(cfeature.STATES, linestyle='-', linewidth=0.5)
+ax0.add_feature(cfeature.LAND, edgecolor='black')
+ssrdc_mean.plot(ax=ax0, cmap='YlOrBr', transform=ccrs.PlateCarree())
+ax0.set_title('Incidência Solar Total (Média)')
+
+# Mapa da média da direção solar
+ax1 = axes[1]
+fdir_mean = fdir.mean(dim='time')
+ax1.set_extent([-75, -35, -35, 5])
+ax1.coastlines(resolution='50m', linewidth=1)
+ax1.add_feature(cfeature.BORDERS, linestyle='-', linewidth=1)
+ax1.add_feature(cfeature.STATES, linestyle='-', linewidth=0.5)
+ax1.add_feature(cfeature.LAND, edgecolor='black')
+fdir_mean.plot(ax=ax1, cmap='YlGn', transform=ccrs.PlateCarree())
+ax1.set_title('Direção Solar (Média)')
+
+plt.tight_layout()
+fig.savefig('mapa_solar_grande.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_SOLAR_CAMPOS.nc', engine='netcdf4')
+
+# Variáveis relevantes
+ssrdc = ds['ssrdc']  # Incidência solar total
+fdir = ds['fdir']    # Direção solar
+
+# Limites da região de interesse
+lon_min, lon_max = -45, -35
+lat_min, lat_max = -35, -20
+
+# mapas para a média da incidência solar e direção solar na região de interesse
+fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 12), dpi=100, subplot_kw={'projection': ccrs.PlateCarree()})
+
+# Mapa da média de incidência solar total
+ax0 = axes[0]
+ssrdc_mean = ssrdc.mean(dim='time')
+ax0.set_extent([lon_min, lon_max, lat_min, lat_max])
+ax0.coastlines(resolution='10m', linewidth=1)
+ax0.add_feature(cfeature.BORDERS, linestyle='-', linewidth=1)
+ax0.add_feature(cfeature.STATES, linestyle='-', linewidth=0.5)
+ax0.add_feature(cfeature.LAND, edgecolor='black')
+ssrdc_mean.plot(ax=ax0, cmap='YlOrBr', transform=ccrs.PlateCarree())
+ax0.set_title('Incidência Solar Total (Média)')
+
+# Mapa da média da direção solar
+ax1 = axes[1]
+fdir_mean = fdir.mean(dim='time')
+ax1.set_extent([lon_min, lon_max, lat_min, lat_max])
+ax1.coastlines(resolution='10m', linewidth=1)
+ax1.add_feature(cfeature.BORDERS, linestyle='-', linewidth=1)
+ax1.add_feature(cfeature.STATES, linestyle='-', linewidth=0.5)
+ax1.add_feature(cfeature.LAND, edgecolor='black')
+fdir_mean.plot(ax=ax1, cmap='YlGn', transform=ccrs.PlateCarree())
+ax1.set_title('Direção Solar (Média)')
+
+plt.tight_layout()
+fig.savefig('mapa_solar.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_SOLAR_CAMPOS.nc', engine='netcdf4')
+# Extraia os dados de radiação solar direta
+rad_solar_direta = ds['ssrdc']
+
+#  DataFrame com os dados do Xarray
+df = rad_solar_direta.to_dataframe()
+# Reset o índice para que a coluna de data e hora seja tratada como coluna separada
+df.reset_index(inplace=True)
+# gráfico da série temporal com nomes de meses no eixo x
+plt.figure(figsize=(12, 6))
+plt.plot(df['time'], df['ssrdc'])
+plt.title('Série Temporal da Radiação Solar Direta (2022)')
+plt.xlabel('Data')
+plt.ylabel('Radiação Solar Direta (W/m²)')
+plt.grid(True)
+plt.savefig('serie_temporal_radiacao_solar_direta.png')
+plt.show()
+
+# Calcular a Radiação Solar Total como o produto da Radiação Solar Direta e a Fração de Direção Solar
+rad_solar_total = ds['ssrdc'] * ds['fdir']
+# DataFrame com os dados do Xarray, dando um nome à variável
+df = rad_solar_total.to_dataframe(name='RadSolarTotal')
+
+# Reset o índice para que a coluna de data e hora seja tratada como coluna separada
+df.reset_index(inplace=True)
+#  gráfico da série temporal da Radiação Solar Total
+plt.figure(figsize=(12, 6))
+plt.plot(df['time'], df['RadSolarTotal'], color='orange')
+plt.title('Série Temporal da Radiação Solar Total (2022)')
+plt.xlabel('Data')
+plt.ylabel('Radiação Solar Total (W/m²)')
+plt.grid(True)
+plt.savefig('serie_temporal_radiacao_solar_total.png')
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_SOLAR_CAMPOS.nc', engine='netcdf4')
+# Escolha uma localização (latitude e longitude) específica
+latitude = -22.5  # Substitua pela latitude desejada
+longitude = -43.5  # Substitua pela longitude desejada
+# Extraia os dados de radiação solar direta para a localização específica
+rad_solar_direta = ds['ssrdc'].sel(latitude=latitude, longitude=longitude)
+# Selecione os meses de cada estação (por exemplo, verão, outono, inverno e primavera)
+meses_verao = rad_solar_direta.sel(time=rad_solar_direta['time.month'].isin([1, 2, 12]))  # Verão
+meses_outono = rad_solar_direta.sel(time=rad_solar_direta['time.month'].isin([3, 4, 5]))  # Outono
+meses_inverno = rad_solar_direta.sel(time=rad_solar_direta['time.month'].isin([6, 7, 8]))  # Inverno
+meses_primavera = rad_solar_direta.sel(time=rad_solar_direta['time.month'].isin([9, 10, 11]))  # Primavera
+
+# Calcula média para cada hora do dia separadamente para cada estação
+media_verao = meses_verao.groupby('time.hour').mean(dim='time')
+media_outono = meses_outono.groupby('time.hour').mean(dim='time')
+media_inverno = meses_inverno.groupby('time.hour').mean(dim='time')
+media_primavera = meses_primavera.groupby('time.hour').mean(dim='time')
+
+# gráfico de linhas para comparar as estações do ano
+plt.figure(figsize=(12, 6))
+media_verao.plot(label='Verão (Dez-Fev)', color='red')
+media_outono.plot(label='Outono (Mar-Mai)', color='orange')
+media_inverno.plot(label='Inverno (Jun-Ago)', color='blue')
+media_primavera.plot(label='Primavera (Set-Nov)', color='green')
+plt.title('Comparação de Radiação Solar nas Estações do Ano (2022)')
+plt.xlabel('Hora do Dia')
+plt.ylabel('Média de Radiação Solar Direta (W/m²)')
+plt.grid(True)
+plt.legend()
+plt.savefig('comparacao_radiacao_estacoes.png')  # Salva o gráfico como um arquivo PNG
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_SOLAR_CAMPOS.nc', engine='netcdf4')
+# Variáveis relevantes
+ssrdc = ds['ssrdc']  # Incidência solar total
+
+
+# Limites da região de interesse
+lon_min, lon_max = -45, -35
+lat_min, lat_max = -35, -20
+
+# Eficiência da placa solar
+efficiency = 0.15
+
+# Coordenadas das plataformas com cores diferentes
+platforms = {
+    'NAMORADO 2 (PNA-2)': {'latitude': -22.45073, 'longitude': -40.41175, 'color': 'red'},
+    'PETROBRAS 26 (P-26)': {'latitude': -22.4684, 'longitude': -40.02869, 'color': 'blue'},
+    'PETROBRAS 32 (P-32)': {'latitude': -22.2051, 'longitude': -40.1431, 'color': 'green'},
+    'PETROBRAS 37 (P-37)': {'latitude': -22.4868, 'longitude': -40.09779, 'color': 'purple'},
+    'PETROBRAS IX': {'latitude': -22.57358, 'longitude': -40.82192, 'color': 'orange'},
+    'PETROBRAS XIX': {'latitude': -22.3927, 'longitude': -40.05438, 'color': 'pink'},
+    'PETROBRAS XXXIII': {'latitude': -22.37, 'longitude': -40.0267, 'color': 'brown'},
+    'VERMELHO 1 (PVM-1)': {'latitude': -22.16065, 'longitude': -40.27872, 'color': 'cyan'},
+    'VERMELHO 2 (PVM-2)': {'latitude': -22.17535, 'longitude': -40.29147, 'color': 'magenta'},
+}
+
+# Crie mapas para a média da incidência solar na região de interesse
+# Mapa da média de incidência solar total
+fig, ax0 = plt.subplots(figsize=(10, 8), subplot_kw={'projection': ccrs.PlateCarree()})
+ssrdc_mean = ssrdc.mean(dim='time')
+ax0.set_extent([lon_min, lon_max, lat_min, lat_max])
+ax0.coastlines(resolution='10m', linewidth=1)
+ax0.add_feature(cfeature.BORDERS, linestyle='-', linewidth=1)
+ax0.add_feature(cfeature.STATES, linestyle='-', linewidth=0.5)
+ax0.add_feature(cfeature.LAND, edgecolor='black')
+img0 = ssrdc_mean.plot(ax=ax0, cmap='YlOrBr', transform=ccrs.PlateCarree())
+
+# Adicione uma barra de cores e ajuste o rótulo
+cbar0 = plt.colorbar(img0, ax=ax0, orientation='vertical', pad=0.05)
+cbar0.set_label('Radiação Solar (W/m²)')
+
+# Adicione os pontos das plataformas após a barra de cores
+platform_potentials = {}
+for platform, data in platforms.items():
+    # Use o método 'nearest' para selecionar as coordenadas mais próximas
+    lat_idx = ssrdc.latitude.sel(latitude=data['latitude'], method='nearest').item()
+    lon_idx = ssrdc.longitude.sel(longitude=data['longitude'], method='nearest').item()
+
+    platform_rad = ssrdc.sel(latitude=lat_idx, longitude=lon_idx)
+    platform_potential = (platform_rad.sum(dim='time').values * efficiency) / 1000000000  # Convertendo para GigaWatt-hora (GWh)
+    platform_potentials[platform] = platform_potential
+
+    ax0.plot(data['longitude'], data['latitude'], marker='o', color=data['color'], markersize=8, transform=ccrs.PlateCarree(), label=f'{platform}\nPotencial: {platform_potential:.3f} GWh')
+
+# Adicione a legenda abaixo do mapa
+ax0.legend(loc='lower center', bbox_to_anchor=(0.5, -0.2), ncol=4)
+ax0.set_title('Incidência Solar Total (Média)')
+fig.savefig('mapa_incidencia_solar.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+
+
+#Energia das Marés
+
+import cdsapi
+
+c = cdsapi.Client()
+
+c.retrieve(
+    'reanalysis-era5-single-levels',
+    {
+        'product_type': 'reanalysis',
+        'format': 'netcdf',
+        'variable': [
+            'maximum_individual_wave_height', 'mean_direction_of_wind_waves', 'mean_period_of_total_swell',
+            'mean_wave_period', 'mean_wave_period_of_first_swell_partition', 'model_bathymetry',
+            'significant_height_of_total_swell', 'significant_height_of_wind_waves',
+        ],
+        'year': '2022',
+        'month': [
+            '01', '02', '03',
+            '04', '05', '06',
+            '07', '08', '09',
+            '10', '11', '12',
+        ],
+        'day': [
+            '01', '02', '03',
+            '04', '05', '06',
+            '07', '08', '09',
+            '10', '11', '12',
+            '13', '14', '15',
+            '16', '17', '18',
+            '19', '20', '21',
+            '22', '23', '24',
+            '25', '26', '27',
+            '28', '29', '30',
+            '31',
+        ],
+        'time': [
+            '00:00', '01:00', '02:00',
+            '03:00', '04:00', '05:00',
+            '06:00', '07:00', '08:00',
+            '09:00', '10:00', '11:00',
+            '12:00', '13:00', '14:00',
+            '15:00', '16:00', '17:00',
+            '18:00', '19:00', '20:00',
+            '21:00', '22:00', '23:00',
+        ],
+        'area': [
+            -27, -45, -20, -35, 
+        ],
+    },
+    'Era5_2022_MARES_CAMPOS.nc')
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_MARES_CAMPOS.nc', engine='netcdf4')
+
+# Extraia as variáveis relevantes
+altura_maxima_das_ondas = ds['hmax']
+periodo_medio_das_ondas = ds['mwp']
+direcao_das_ondas = ds['mdww']
+
+# Crie um gráfico de contorno que mostra o potencial de geração de energia das marés
+plt.figure(figsize=(12, 8))
+plt.contourf(altura_maxima_das_ondas.longitude, altura_maxima_das_ondas.latitude, 
+             (altura_maxima_das_ondas *altura_maxima_das_ondas* periodo_medio_das_ondas * 0,5).mean(dim='time'),
+             cmap='viridis')
+plt.colorbar(label='Potencial de Geração de Energia das Marés')
+plt.title('Potencial de Geração de Energia das Marés - 2022', fontsize=16)
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.grid(True)
+
+plt.show()
+
+
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_MARES_CAMPOS.nc', engine='netcdf4')
+
+# Extraia as variáveis relevantes
+altura_maxima_das_ondas = ds['hmax']
+periodo_medio_das_ondas = ds['mwp']
+direcao_das_ondas = ds['mdww']
+
+# Coordenadas das plataformas
+platforms = {
+    'NAMORADO 2 (PNA-2)': {'latitude': -22.45073, 'longitude': -40.41175},
+    'PETROBRAS 26 (P-26)': {'latitude': -22.4684, 'longitude': -40.02869},
+    'PETROBRAS 32 (P-32)': {'latitude': -22.2051, 'longitude': -40.1431},
+    'PETROBRAS 37 (P-37)': {'latitude': -22.4868, 'longitude': -40.09779},
+    'PETROBRAS IX': {'latitude': -22.57358, 'longitude': -40.82192},
+    'PETROBRAS XIX': {'latitude': -22.3927, 'longitude': -40.05438},
+    'PETROBRAS XXXIII': {'latitude': -22.37, 'longitude': -40.0267},
+    'VERMELHO 1 (PVM-1)': {'latitude': -22.16065, 'longitude': -40.27872},
+    'VERMELHO 2 (PVM-2)': {'latitude': -22.17535, 'longitude': -40.29147},
+}
+
+# Crie um gráfico de contorno que mostra o potencial de geração de energia das marés
+plt.figure(figsize=(12, 8))
+plt.contourf(altura_maxima_das_ondas.longitude, altura_maxima_das_ondas.latitude, 
+             (altura_maxima_das_ondas * periodo_medio_das_ondas * direcao_das_ondas).mean(dim='time'),
+             cmap='viridis')
+plt.colorbar(label='Potencial de Geração de Energia das Marés')
+plt.title('Potencial de Geração de Energia das Marés - 2022', fontsize=16)
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.grid(True)
+
+# Adicione pontos de localização das plataformas e a legenda
+for platform, coords in platforms.items():
+    plt.scatter(coords['longitude'], coords['latitude'], label=platform, marker='o', s=100)
+
+# Exiba a legenda no gráfico
+plt.legend()
+
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_MARES_CAMPOS.nc', engine='netcdf4')
+
+# Extraia a variável de altura máxima das ondas
+altura_maxima_das_ondas = ds['hmax']
+
+# Crie um gráfico da altura máxima das ondas ao longo do tempo
+plt.figure(figsize=(12, 6))
+altura_maxima_das_ondas.mean(dim=('latitude', 'longitude')).plot()
+plt.title('Análise da Altura Máxima das Ondas (2022)', fontsize=16)
+plt.xlabel('Tempo')
+plt.ylabel('Altura Máxima das Ondas (metros)')
+plt.grid(True)
+
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Lista de arquivos de dados para diferentes altitudes de ondas
+file_paths = ['Era5_2022_MARES_CAMPOS.nc']
+altitudes = ['Altura Máxima das Ondas']  # Etiqueta correspondente
+
+# Função para calcular a média e variação da altura máxima das ondas
+def calculate_mean_and_variance(file_path):
+    ds = xr.open_dataset(file_path)
+    hmax = ds['hmax']
+    mean_hmax = hmax.mean(dim=['longitude', 'latitude']).values
+    variance_hmax = hmax.var(dim=['longitude', 'latitude']).values
+    ds.close()
+    return mean_hmax, variance_hmax
+
+# Mapeamento de meses para estações do ano
+months_to_seasons = {
+    1: 'Verão',
+    2: 'Verão',
+    3: 'Verão',
+    4: 'Outono',
+    5: 'Outono',
+    6: 'Outono',
+    7: 'Inverno',
+    8: 'Inverno',
+    9: 'Inverno',
+    10: 'Primavera',
+    11: 'Primavera',
+    12: 'Primavera',
+}
+
+# Organize os dados
+seasons = ['Verão', 'Outono', 'Inverno', 'Primavera']
+data = {season: [] for season in seasons}
+
+for file_path in file_paths:
+    mean_hmax, variance_hmax = calculate_mean_and_variance(file_path)
+    for i, season in enumerate(seasons):
+        data[season].append((mean_hmax[i], variance_hmax[i]))
+
+# Configurações do gráfico
+fig, ax = plt.subplots(figsize=(12, 8))
+bar_width = 0.2
+index = np.arange(len(seasons))
+
+for i, altitude in enumerate(altitudes):
+    means = [data[season][i][0] for season in seasons]
+    variances = [data[season][i][1] for season in seasons]
+    ax.bar(index + i * bar_width, means, bar_width, label=f'{altitude}', yerr=variances, capsize=5)
+
+ax.set_xlabel('Estação do Ano')
+ax.set_ylabel('Altura Média das Ondas (metros)')
+ax.set_title('Altura Média das Ondas e Variação Estatística em Diferentes Estações do Ano')
+ax.set_xticks(index + bar_width * (len(altitudes) - 1) / 2)
+ax.set_xticklabels(seasons)
+ax.legend()
+
+plt.savefig('grafico_altura_ondas.png')
+plt.tight_layout()
+plt.show()
+
+import matplotlib.pyplot as plt
+
+# Extraia os dados de altura significativa das ondas do arquivo NetCDF
+altura_significativa = ds['shts']
+
+# Crie um gráfico de linha para a altura significativa das ondas
+plt.figure(figsize=(12, 6))
+plt.plot(altura_significativa.time, altura_significativa.mean(dim=['latitude', 'longitude']))
+plt.xlabel('Tempo')
+plt.ylabel('Altura Significativa das Ondas (metros)')
+plt.title('Variação da Altura Significativa das Ondas ao Longo do Tempo')
+plt.grid(True)
+plt.show()
+
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_MARES_CAMPOS.nc', engine='netcdf4')
+
+# Extraia as variáveis relevantes
+altura_maxima_das_ondas = ds['hmax']
+periodo_medio_das_ondas = ds['mwp']
+direcao_das_ondas = ds['mdww']
+
+# Coordenadas das plataformas
+platforms = {
+    'NAMORADO 2 (PNA-2)': {'latitude': -22.45073, 'longitude': -40.41175},
+    'PETROBRAS 26 (P-26)': {'latitude': -22.4684, 'longitude': -40.02869},
+    'PETROBRAS 32 (P-32)': {'latitude': -22.2051, 'longitude': -40.1431},
+    'PETROBRAS 37 (P-37)': {'latitude': -22.4868, 'longitude': -40.09779},
+    'PETROBRAS IX': {'latitude': -22.57358, 'longitude': -40.82192},
+    'PETROBRAS XIX': {'latitude': -22.3927, 'longitude': -40.05438},
+    'PETROBRAS XXXIII': {'latitude': -22.37, 'longitude': -40.0267},
+    'VERMELHO 1 (PVM-1)': {'latitude': -22.16065, 'longitude': -40.27872},
+    'VERMELHO 2 (PVM-2)': {'latitude': -22.17535, 'longitude': -40.29147},
+}
+
+# Calcule o potencial de geração de energia das marés para cada plataforma
+potencia_por_plataforma = {}
+for platform, coords in platforms.items():
+    latitude = coords['latitude']
+    longitude = coords['longitude']
+    potencial = (altura_maxima_das_ondas.sel(
+        latitude=latitude, longitude=longitude, method='nearest') *
+                 periodo_medio_das_ondas.sel(
+                     latitude=latitude, longitude=longitude, method='nearest') *
+                 direcao_das_ondas.sel(
+                     latitude=latitude, longitude=longitude, method='nearest')).mean(dim='time')
+    potencia_por_plataforma[platform] = potencial.values
+
+# Crie um gráfico de barras para o potencial de geração de energia das marés por plataforma
+plt.figure(figsize=(10, 6))
+plt.bar(potencia_por_plataforma.keys(), potencia_por_plataforma.values(), color='b')
+plt.title('Potencial de Geração de Energia das Marés por Plataforma - 2022', fontsize=16)
+plt.xlabel('Plataforma')
+plt.ylabel('Potencial de Geração de Energia das Marés (kW)')  # Adicione a unidade de medida
+plt.xticks(rotation=45, ha="right")
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+plt.show()
+
+#Eólica Offshore
+
+import cdsapi
+
+c = cdsapi.Client()
+
+c.retrieve(
+    'reanalysis-era5-pressure-levels',
+    {
+        'product_type': 'reanalysis',
+        'format': 'netcdf',
+        'variable': [
+            'u_component_of_wind', 'v_component_of_wind',
+        ],
+        'pressure_level': '1000',
+        'year': '2022',
+         'month': [
+            '01', '02', '03',
+            '04', '05', '06',
+            '07', '08', '09',
+            '10', '11', '12',
+        ],
+        'day': [
+            '01', '02', '03',
+            '04', '05', '06',
+            '07', '08', '09',
+            '10', '11', '12',
+            '13', '14', '15',
+            '16', '17', '18',
+            '19', '20', '21',
+            '22', '23', '24',
+            '25', '26', '27',
+            '28', '29', '30',
+            '31',
+        ],
+        'time': [
+            '00:00', '01:00', '02:00',
+            '03:00', '04:00', '05:00',
+            '06:00', '07:00', '08:00',
+            '09:00', '10:00', '11:00',
+            '12:00', '13:00', '14:00',
+            '15:00', '16:00', '17:00',
+            '18:00', '19:00', '20:00',
+            '21:00', '22:00', '23:00',
+        ],
+        'area': [
+            -27, -45, -20, -35,  # Coordenadas da Bacia de Campos e um pouco mais pegando a costa brasileira
+        ],
+    },
+    'Era5_2022_1000HPA_CAMPOS.nc')
+import xarray as xr
+
+titulo = "Marcação das Plataformas na Bacia de Campos Desativadas"
+
+titulo_html = """<h1 align="center" style="font-family: verdana; font-size:16px; font-weight:bold; text-transform: uppercase;">{}</h1>""".format(titulo)
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_1000HPA_CAMPOS.nc', engine='netcdf4')
+
+# Filtra os dados para obter os horários dos três dias (22, 23 e 24 de março)
+#data_3_days = ds.sel(time=(ds.time.dt.day >= 22) & (ds.time.dt.day <= 24))
+
+# Filtra os dados para a pressão de 775 hPa
+#data_3_days_775 = data_3_days.sel(level=775)
+
+# Suponha que você tenha os dados de latitude e longitude das plataformas
+plat_coords = {
+    'NAMORADO 2 (PNA-2)'   : {'latitude': -22.45073, 'longitude': -40.41175},
+    'PETROBRAS 26 (P-26)': {'latitude': -22.4684,  'longitude': -40.02869},
+    'PETROBRAS 32 (P-32)': {'latitude': -22.2051,  'longitude': -40.1431},
+    'PETROBRAS 37 (P-37)': {'latitude': -22.4868,  'longitude': -40.09779},
+    'PETROBRAS IX'       : {'latitude': -22.57358, 'longitude': -40.82192},
+    'PETROBRAS XIX'      : {'latitude': -22.3927,  'longitude': -40.05438},
+    'PETROBRAS XXXIII'   : {'latitude': -22.37,    'longitude': -40.0267},
+    'VERMELHO 1 (PVM-1)' : {'latitude': -22.16065, 'longitude': -40.27872},
+    'VERMELHO 2 (PVM-2)' : {'latitude': -22.17535, 'longitude': -40.29147},
+}
+
+# Lista para armazenar os resultados de intensidade do vento por plataforma
+wind_speeds = []
+
+# Calcula a intensidade do vento em cada ponto das plataformas
+for platform, coords in plat_coords.items():
+    lat, lon = coords['latitude'], coords['longitude']
+    
+    # Use os dados do NetCDF para obter a intensidade do vento no ponto desejado
+    u = ds['u'].sel(latitude=lat, longitude=lon, method='nearest')
+    v = ds['v'].sel(latitude=lat, longitude=lon, method='nearest')
+    
+    # Calcula a intensidade do vento a partir das componentes u e v
+    wind_speed = (u**2 + v**2)**0.5
+    
+    # Adiciona a intensidade do vento à lista
+    wind_speeds.append({'Plataforma': platform, 'Intensidade do Vento (m/s)': wind_speed.values[0]})
+
+# Converta a lista de resultados em um DataFrame para facilitar a manipulação
+import pandas as pd
+df_wind_speeds = pd.DataFrame(wind_speeds)
+
+# Exibe o DataFrame com as intensidades do vento por plataforma
+print(df_wind_speeds)
+
+
+import folium
+
+# Crie um mapa interativo com folium centrado na Bacia de Campos
+m = folium.Map(location=[-22.8, -40.3], zoom_start=8)
+m.get_root().html.add_child(folium.Element(titulo_html))
+
+# Adicione marcadores para as localizações das plataformas de petróleo e gás na Bacia de Campos
+platforms = {
+
+    'NAMORADO 2 (PNA-2)' :[-22.45073, -40.41175],
+    'PETROBRAS 26 (P-26)' :[-22.4684, -40.02869],
+    'PETROBRAS 32 (P-32)' :[-22.2051, -40.1431],
+    'PETROBRAS 37 (P-37)' :[-22.4868, -40.09779],
+    'PETROBRAS IX' :[-22.57358, -40.82192],
+    'PETROBRAS XIX' :[-22.3927, -40.05438],
+    'PETROBRAS XXXIII' :[-22.37, -40.0267],
+    'VERMELHO 1 (PVM-1)' :[-22.16065, -40.27872],
+    'VERMELHO 2 (PVM-2)' :[-22.17535, -40.29147],
+    
+    
+}
+
+# Função para atribuir cores com base na intensidade do vento
+
+def color_wind_speed(speed):
+    if speed < 5.0:
+        return 'green'
+    elif 5.0 <= speed < 12.0:
+        return 'beige'
+    elif 12.0 <= speed < 25.0:
+        return 'orange'
+    else:
+        return 'black'
+
+# Suponha que você tenha os dados de intensidade do vento para cada plataforma
+wind_speeds = {
+    'NAMORADO 2 (PNA-2)'   : df_wind_speeds.iloc[0]['Intensidade do Vento (m/s)'],  # Substitua pelos valores reais das intensidades do vento
+    'PETROBRAS 26 (P-26)': df_wind_speeds.iloc[1]['Intensidade do Vento (m/s)'],
+    'PETROBRAS 32 (P-32)': df_wind_speeds.iloc[2]['Intensidade do Vento (m/s)'],
+    'PETROBRAS 37 (P-37)': df_wind_speeds.iloc[3]['Intensidade do Vento (m/s)'],
+    'PETROBRAS IX'       : df_wind_speeds.iloc[4]['Intensidade do Vento (m/s)'],
+    'PETROBRAS XIX'      : df_wind_speeds.iloc[5]['Intensidade do Vento (m/s)'],
+    'PETROBRAS XXXIII'   : df_wind_speeds.iloc[6]['Intensidade do Vento (m/s)'],
+    'VERMELHO 1 (PVM-1)' : df_wind_speeds.iloc[7]['Intensidade do Vento (m/s)'],
+    'VERMELHO 2 (PVM-2)' : df_wind_speeds.iloc[8]['Intensidade do Vento (m/s)'],
+}
+
+# Adicione os marcadores ao mapa
+for platform, (lat, lon) in platforms.items():
+    # Obtenha a intensidade do vento da plataforma
+    wind_speed = wind_speeds.get(platform, 0.0)  # Valor padrão 0.0 se não houver dados
+    
+    color = color_wind_speed(wind_speed)
+    
+    # Adicione marcadores com cores baseadas na intensidade do vento
+    folium.Marker(
+        location=[lat, lon],
+        popup=f'Plataforma: {platform}<br>Intensidade do Vento: {wind_speed:.2f} m/s',
+        icon=folium.Icon(color=color)
+    ).add_to(m)
+
+m.save('mapa_interativo.html')
+# Exiba o mapa interativo
+m
+import folium
+import xarray as xr
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#Título
+
+titulo = "Media do Vento na Região da Bacia de Campos"
+
+titulo_html = """<h1 align="center" style="font-family: verdana; font-size:16px; font-weight:bold; text-transform: uppercase;">{}</h1>""".format(titulo)
+
+
+# Carregue o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_1000HPA_CAMPOS.nc', engine='netcdf4')
+
+# Coordenadas iniciais do mapa (centro da Bacia de Campos)
+latitude_inicial = -22.7366
+longitude_inicial = -40.1116
+
+# Crie um objeto de mapa Folium
+m = folium.Map(location=[latitude_inicial, longitude_inicial], zoom_start=8)
+m.get_root().html.add_child(folium.Element(titulo_html))
+
+# Lista para armazenar os resultados de intensidade do vento por latitude e longitude
+wind_speeds = []
+
+# Defina a densidade da grade
+density = 0.05  # Exemplo: 0.1 graus de separação
+
+# Crie uma grade de coordenadas
+lats = np.arange(ds.latitude.min(), ds.latitude.max(), density)
+lons = np.arange(ds.longitude.min(), ds.longitude.max(), density)
+
+# Calcula a intensidade do vento para cada ponto de grade (latitude, longitude)
+for lat in lats:
+    for lon in lons:
+        u = ds['u'].sel(latitude=lat, longitude=lon, method='nearest')
+        v = ds['v'].sel(latitude=lat, longitude=lon, method='nearest')
+        wind_speed = (u**2 + v**2)**0.5
+
+        # Verifique se há valores válidos antes de adicionar à lista
+        if not np.isnan(wind_speed).any():
+            wind_speeds.append([lat, lon, wind_speed.values[0].astype(np.float64)])  # Converta para float64
+
+# Determine os valores mínimo e máximo de intensidade do vento
+min_wind_speed = np.nanmin([wind_speed for _, _, wind_speed in wind_speeds])
+max_wind_speed = np.nanmax([wind_speed for _, _, wind_speed in wind_speeds])
+
+# Crie uma paleta de cores personalizada usando seaborn
+cmap = sns.color_palette("coolwarm", as_cmap=True)
+
+# Normalize os valores de intensidade do vento entre 0 e 1 para corresponder à paleta de cores personalizada
+norm = plt.Normalize(min_wind_speed, max_wind_speed)
+
+# Crie uma função de gradiente personalizada para mapear a intensidade do vento para uma cor na paleta de cores personalizada
+def calculate_color(wind_speed):
+    return cmap(norm(wind_speed))
+
+# Mapeie as cores de acordo com as intensidades do vento usando a função de gradiente personalizada
+colors = [calculate_color(wind_speed) for _, _, wind_speed in wind_speeds]
+
+# Crie um objeto de mapa de calor com os dados e as cores mapeadas
+from folium.plugins import HeatMap
+
+heat_data = [[lat, lon, wind_speed] for lat, lon, wind_speed in wind_speeds]
+
+HeatMap(heat_data, gradient=None, min_opacity=0.5, radius=15, blur=16, overlay=True, control=True, name='Heat Map', show=True, legend_name='Intensidade do Vento (m/s)', gradient_fill_colors=colors).add_to(m)
+
+# Adicione um marcador de texto com o nome do lugar em negrito
+place_name = 'Bacia de Campos'
+bold_place_name = '<strong>' + place_name + '</strong>'
+
+folium.map.Marker(
+    [-22.7366, -40.1116],
+    icon=folium.DivIcon(
+        html=f'<div>{bold_place_name}</div>',
+        icon_size=(120, 36),  # Tamanho do ícone (ajuste conforme necessário)
+        icon_anchor=(0, 0),
+    ),
+).add_to(m)
+
+# Visualize o mapa no seu ambiente Jupyter Notebook ou salve-o em um arquivo HTML
+m
+
+
+import xarray as xr
+import matplotlib.pyplot as plt
+
+# Carregue os dados do arquivo NetCDF
+ds = xr.open_dataset('Era5_2022_1000HPA_CAMPOS.nc')
+
+# Calcule a intensidade do vento a partir das componentes u e v
+u = ds['u']
+v = ds['v']
+wspd = (u**2 + v**2)**0.5
+
+# Calcule a média da intensidade do vento ao longo do ano de 2022
+wspd_mean = wspd.mean(dim=['longitude', 'latitude',])
+
+# Plote o gráfico da intensidade do vento
+plt.figure(figsize=(12, 6))
+wspd_mean.plot.line(marker='o', markersize=3, linestyle='-', color='b')
+plt.title('Intensidade Média do Vento (2022)')
+plt.xlabel('Tempo')
+plt.xticks(rotation=45)
+plt.ylabel('Intensidade do Vento (m/s)')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+# Feche o arquivo NetCDF
+ds.close()
+import xarray as xr
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+
+# Carrega o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_1000HPA_CAMPOS.nc', engine='netcdf4')
+
+# Filtra os dados para obter os horários dos três dias (22, 23 e 24 de março)
+#data_3_days = ds.sel(time=(ds.time.dt.day >= 22) & (ds.time.dt.day <= 24))
+
+# Filtra os dados para a pressão de 775 hPa
+#data_3_days_775 = data_3_days.sel(level=775)
+
+# Calcula a velocidade do vento (wspd) a partir das componentes u e v
+u = ds['u']
+v = ds['v']
+wspd = (u**2 + v**2)**0.5
+
+# Calcula a média da velocidade do vento para cada ponto de grade ao longo dos horários e dias
+wspd_mean = wspd.mean(dim=['time'])
+
+# Configura a projeção Plate Carrée centrada no Brasil
+projection = ccrs.PlateCarree(central_longitude=-45)
+
+# Plota o gráfico da variação da média da velocidade do vento
+plt.figure(figsize=(25, 26))
+ax = plt.axes(projection=projection)
+ax.coastlines()
+im = wspd_mean.plot(ax=ax,  transform=ccrs.PlateCarree(), add_colorbar=False)
+
+# Adiciona a barra de cores manualmente
+cbar = plt.colorbar(im, orientation='horizontal', pad=0.05)
+cbar.set_label('Velocidade do Vento (m/s)', fontsize=30)
+cbar.ax.tick_params(labelsize=20)
+
+# Adiciona marcadores para as localizações das plataformas de petróleo e gás
+platforms = {
+    'NAMORADO 2 (PNA-2)' :(-22.45073, -40.41175),
+    'PETROBRAS 26 (P-26)' :(-22.4684, -40.02869),
+    'PETROBRAS 32 (P-32)' :(-22.2051, -40.1431),
+    'PETROBRAS 37 (P-37)' :(-22.4868, -40.09779),
+    'PETROBRAS IX' :(-22.57358, -40.82192),
+    'PETROBRAS XIX' :(-22.3927, -40.05438),
+    'PETROBRAS XXXIII' :(-22.37, -40.0267),
+    'VERMELHO 1 (PVM-1)' :(-22.16065, -40.27872),
+    'VERMELHO 2 (PVM-2)' :(-22.17535, -40.29147),
+}
+
+for platform, (lat, lon) in platforms.items():
+    ax.plot(lon, lat, marker='o', color='red', markersize=10, transform=ccrs.PlateCarree())
+
+ax.gridlines(draw_labels=True, linestyle='--', color='gray')
+plt.title('Média da Velocidade do Vento no Ano de 2022 - 1000 HPA', fontsize=30)
+plt.xlabel('Longitude', fontsize=30)
+plt.ylabel('Latitude', fontsize=30)
+plt.savefig('grafico_velocidade_vento_1000HPA.png')
+plt.show()
+
+# Fecha o arquivo NetCDF
+ds.close()
+
+import xarray as xr
+import numpy as np
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+
+# Carrega o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_1000HPA_CAMPOS.nc', engine='netcdf4')
+
+# Filtra os dados para obter os horários dos três dias (22, 23 e 24 de março)
+#data_3_days = ds.sel(time=(ds.time.dt.day >= 22) & (ds.time.dt.day <= 24))
+
+# Filtra os dados para a pressão de 775 hPa
+#data_3_days_775 = data_3_days.sel(level=775)
+
+# Calcula a velocidade do vento (wspd) a partir das componentes u e v
+u = ds['u']
+v = ds['v']
+wspd = (u**2 + v**2)**0.5
+
+# Calcula a média da velocidade do vento para cada ponto de grade ao longo dos horários e dias
+wspd_mean = wspd.mean(dim=['time'])
+
+# Calcula a direção da corrente de vento
+wind_direction = np.arctan2(v.mean(dim='time'), u.mean(dim='time')) * 180 / np.pi
+
+# Configura a projeção Plate Carrée centrada no Brasil
+projection = ccrs.PlateCarree(central_longitude=-45)
+
+# Plota o gráfico da variação da média da velocidade do vento e a direção da corrente de vento
+fig = plt.figure(figsize=(12, 8))
+ax = plt.axes(projection=projection)
+ax.coastlines()
+
+# Plota a variação da média da velocidade do vento
+wspd_mean.plot(ax=ax, transform=ccrs.PlateCarree(), add_colorbar=True,
+               cbar_kwargs={'label': 'Velocidade do Vento (m/s)'})
+
+# Plota a direção da corrente de vento usando setas
+quiver = ax.quiver(wspd_mean.longitude.values, wspd_mean.latitude.values,
+                   u.mean(dim='time').values, v.mean(dim='time').values,
+                   angles='xy', scale_units='xy', scale=30, color='red', alpha=0.7,
+                   transform=ccrs.PlateCarree(), zorder=5)
+
+# Adiciona marcadores para as localizações das plataformas de petróleo e gás
+platforms = {
+    'NAMORADO 2 (PNA-2)' :(-22.45073, -40.41175),
+    'PETROBRAS 26 (P-26)' :(-22.4684, -40.02869),
+    'PETROBRAS 32 (P-32)' :(-22.2051, -40.1431),
+    'PETROBRAS 37 (P-37)' :(-22.4868, -40.09779),
+    'PETROBRAS IX' :(-22.57358, -40.82192),
+    'PETROBRAS XIX' :(-22.3927, -40.05438),
+    'PETROBRAS XXXIII' :(-22.37, -40.0267),
+    'VERMELHO 1 (PVM-1)' :(-22.16065, -40.27872),
+    'VERMELHO 2 (PVM-2)' :(-22.17535, -40.29147),
+}
+
+for platform, (lat, lon) in platforms.items():
+    ax.plot(lon, lat, marker='o', color='red', markersize=8, transform=ccrs.PlateCarree())
+
+ax.gridlines(draw_labels=True, linestyle='--', color='gray')
+plt.title('Média da Velocidade e Direção da Corrente de Vento no ano de 2022 - 1000HPA')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+
+# Adiciona uma legenda para a direção da corrente de vento
+ax.quiverkey(quiver, X=0.05, Y=0.01, U=10,
+             label='Direção da Corrente de Vento', labelpos='E')
+
+plt.savefig('grafico_direcao_vento_1000HPA.png')
+plt.show()
+
+# Fecha o arquivo NetCDF
+ds.close()
+import xarray as xr
+import numpy as np
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+from matplotlib.lines import Line2D
+
+# Carrega o arquivo NetCDF com os dados
+ds = xr.open_dataset('Era5_2022_1000HPA_CAMPOS.nc', engine='netcdf4')
+
+# ... Código de processamento dos dados ...
+
+# Calcula o potencial de geração eólica nos pontos marcados
+potencial_eolico = 0.5 * densidade_ar * area_pa * wspd_mean ** 3 * eficiencia_aerogerador
+
+# Configura a projeção Plate Carrée centrada no Brasil
+projection = ccrs.PlateCarree(central_longitude=-45)
+
+# Plota o gráfico da variação da média da velocidade do vento e a direção da corrente de vento
+fig = plt.figure(figsize=(12, 8))
+ax = plt.axes(projection=projection)
+ax.coastlines()
+
+# Define cores diferentes para cada plataforma
+cores = ['blue', 'green', 'red', 'purple', 'orange', 'brown', 'pink', 'gray', 'cyan']
+
+# Plota a variação da média da velocidade do vento
+wspd_mean.plot(ax=ax, transform=ccrs.PlateCarree(), add_colorbar=True,
+               cbar_kwargs={'label': 'Velocidade do Vento (m/s)'})
+
+# Plota a direção da corrente de vento usando setas
+quiver = ax.quiver(wspd_mean.longitude.values, wspd_mean.latitude.values,
+                   u.mean(dim='time').values, v.mean(dim='time').values,
+                   angles='xy', scale_units='xy', scale=30, color='red', alpha=0.7,
+                   transform=ccrs.PlateCarree(), zorder=5)
+
+# Adiciona marcadores para as localizações das plataformas de petróleo e gás com cores diferentes
+legend_elements = []
+for i, (platform, (lat, lon)) in enumerate(platforms.items()):
+    ax.plot(lon, lat, marker='o', color=cores[i], markersize=8, transform=ccrs.PlateCarree())
+    potencial = potencial_eolico.sel(latitude=lat, longitude=lon, method='nearest').values
+    legend_elements.append(Line2D([0], [0], marker='o', color=cores[i], markersize=8, 
+                                  label=f'{platform}: {potencial:.2f} W'))
+
+# Adiciona uma legenda lateral com os valores de potencial
+ax.legend(handles=legend_elements, title='Potencial', loc='lower right', bbox_to_anchor=(1, 0.1))
+
+ax.gridlines(draw_labels=True, linestyle='--', color='gray')
+plt.title('Média da Velocidade e Direção da Corrente de Vento no Ano de 2022 - 1000HPA')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+
+# Adiciona uma legenda para a direção da corrente de vento
+ax.quiverkey(quiver, X=0.05, Y=0.01, U=10,
+             label='Direção da Corrente de Vento', labelpos='E')
+
+plt.savefig('pootencial_mediavelocidade_direcao_vento_1000hpa.png')
+plt.show()
+
+# Fecha o arquivo NetCDF
+ds.close()
+
